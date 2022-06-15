@@ -83,9 +83,52 @@ sequenceDiagram
         alt All artifacts successfully uploaded
             Build Node--xBuild Master: Build task successfully completed
         else Some artifacts upload failed
-            Build Node--xBuild Master: Build task failedWW
+            Build Node--xBuild Master: Build task failed
         end
         deactivate Build Node
+    end
+```
+
+
+### Signed packages notarization
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Build Master
+    participant Sign Node
+    participant CAS
+    participant Pulp
+    Build Master->>+Sign Node: Assign sign task
+    Sign Node->>Pulp: Find sign task RPMs
+    Pulp-->>Sign Node: Download sign task RPMs
+    loop For each RPM
+        Sign Node->>+CAS: Authenticate RPM
+        deactivate Sign Node
+        alt RPM authentication failed
+            CAS-->>+Sign Node: RPM is not notarized<br/>or it is untrusted/unsupported
+            Sign Node--x-Build Master: Report sign task failed
+        else RPM authentication failed
+            CAS-->>+Sign Node: RPM is notarized and trusted
+            Sign Node->>Sign Node: Sign RPM
+            Sign Node->>+CAS: Notarize signed RPM
+            CAS-->>-Sign Node: Signed RPM CAS hash
+            Sign Node->>+Pulp: Upload signed RPM
+            deactivate Sign Node
+            Pulp->>-CAS: Authenticate uploaded RPM
+            alt RPM authentication failed
+                CAS-->>+Pulp: RPM is not notarized<br/>or it is untrusted/unsupported
+                Pulp-->>-Sign Node: Report failed upload
+            else RPM authentication successful
+                CAS-->>+Pulp: RPM is notarized and trusted
+                Pulp-->>-Sign Node: Report successful upload
+            end
+        end
+    end
+    alt All RPMs successfully signed and uploaded
+        Sign Node--xBuild Master: Report sign task completed and<br/>send signed RPMs CAS hashes
+    else Some RPMs signing or upload failed
+        Sign Node--xBuild Master: Report sign task failed
     end
 ```
 
