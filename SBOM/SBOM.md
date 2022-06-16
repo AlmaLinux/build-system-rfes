@@ -3,9 +3,31 @@
 
 ## Introduction
 
+### Purpose of document
+
 This document describes an [SBOM](https://en.wikipedia.org/wiki/Software_supply_chain)
 implementation for the [AlmaLinux Build System](https://build.almalinux.org/)
 based on the [Codenotary Community Attestation Service (CAS)](https://github.com/codenotary/cas).
+
+
+### Purpose of SBOM integration
+
+By integrating SBOM into our build pipeline we want to achieve the following
+goals:
+
+1. Secure our supply chain: ensure that the distribution updates were built
+   from a trusted source, that an attacker didn't change/replace them after a
+   build/testing stage and so on. Ideally, we would like to be able to trace a
+   full path starting from CentOS git repositories and ending with delivering
+   verified and signed packages to our public repositories.
+
+2. Reduce the number of ways data can be corrupted (e.g. due to a software
+   bug or a network error) in our system. Ensure that we always operate with
+   valid and consistent data.
+
+3. (A long-term goal) Make possible reproducible builds: we should keep and
+   provide all information (e.g. dependencies list, mock options, source of
+   a package, etc.) required to build a package in the same way that we did.
 
 
 ## SBOM integration overview
@@ -130,6 +152,33 @@ sequenceDiagram
     else Some RPMs signing or upload failed
         Sign Node--xBuild Master: Report sign task failed
     end
+```
+
+
+### Release pipeline notarization
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Maintainer
+    participant Exporter
+    participant Pulp
+    participant CAS
+    Maintainer-->>Exporter: Start distribution sync
+    loop Every new RPM
+        activate Exporter
+        Exporter->>+Pulp: Find RPM
+        Pulp-->>-Exporter: Download RPM
+        Exporter->>CAS: Authenticate RPM
+        deactivate Exporter
+        alt RPM authentication failed
+            CAS-->>+Exporter: RPM is not notarized or it is untrusted/unsupported
+            Exporter--x-Maintainer: Report export failed
+        else RPM authentication successful
+            CAS-->>+Exporter: RPM is notarized and trusted
+        end
+    end
+    Exporter-->>-Maintainer: Report successful export
 ```
 
 
