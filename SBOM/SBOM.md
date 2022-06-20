@@ -129,6 +129,7 @@ Updater service:
    ```shell
     $ cas notarize git:///git_repository_path/ \
           -attr upstream_commit_sbom_hash="${UPSTREAM_COMMIT_CAS_HASH}"
+          -attr sbom_api_ver='0.1'
           -o json | jq -r '.hash'
    ```
 
@@ -139,6 +140,7 @@ Updater service:
    $ cas notarize git:///git_repository_path/ \
          -attr upstream_commit_sbom_hash="${UPSTREAM_COMMIT_CAS_HASH}"
          -attr alma_commit_sbom_hash="${ALMA_COMMIT_CAS_HASH}"
+         -attr sbom_api_ver='0.1'
          -o json
    ```
 
@@ -192,6 +194,52 @@ sequenceDiagram
         deactivate Build Node
     end
 ```
+
+What should be done for CAS integration?
+
+1. If source is the AlmaLinux Git repository, authenticate a git commit in CAS:
+   ```shell
+   $ cas authenticate git:///git_repo_path/
+   # it should return 0 for authenticated and trusted commits
+   ```
+   Save the state of authentication for sending to master.
+
+2. Notarize each artifact after build is completed:
+   ```shell
+   $ cas notarize LICENSE \
+         --attr build_id=10 \
+         --attr source_type=git \
+         --attr git_url=https://example.com/example-git \
+         --attr git_ref=test-ref \
+         --attr git_commit=commit-hash \
+         --attr build_host=example.almalinux.org \
+         --attr sbom_api_ver=0.1 \
+         --output json
+   ```
+3. Send a list of the artifacts and their CAS hashes to master.
+
+4. The master should save CAS hashes to the database for each artifact.
+
+
+What data should be added for each artifact?:
+
+* build id
+* reference (what is the source?)
+  * For gits:
+    * URL
+    * tag/branch
+    * commit hash
+  * For remote srpms:
+    * URL
+    * checksum
+    * NEVRA? TODO: ask Andrew
+  * For uploaded srpms:
+    * checksum
+    * NEVRA? TODO: ask Andrew
+* Target architecture. TODO: ask 
+* Build host name
+* Notarization API version (e.g. 0.1) so that we can change data format later
+  and handle that. We decided to call it `sbom_api_ver='0.1'`
 
 
 ### Signed packages notarization
