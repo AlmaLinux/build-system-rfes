@@ -63,6 +63,88 @@ sequenceDiagram
     end
 ```
 
+CAS supports git repositories notarization out of the box, it saves the
+following information to the [immudb](https://github.com/codenotary/immudb) by
+default:
+
+```json
+{
+  "uid": "1655719129047694286",
+  "kind": "git",
+  "name": "git@github.com:AlmaLinux/cloud-images.git@5b9c88b",
+  "hash": "5f1c7f203d2b90fb369da5f6b4bac5745b21b912326ade0860f66050ddb71aa4",
+  "size": 835,
+  "timestamp": "2022-06-20T09:58:49.047694286Z",
+  "contentType": "",
+  "metadata": {
+    "git": {
+      "Author": {
+        "Email": "elkhan.mammadli@protonmail.com",
+        "Name": "Elkhan Mammadli",
+        "When": "2022-06-03T16:08:56+04:00"
+      },
+      "Commit": "5b9c88b35bc1edaa0f30e9e23a790044396b6b25",
+      "Committer": {
+        "Email": "noreply@github.com",
+        "Name": "GitHub",
+        "When": "2022-06-03T16:08:56+04:00"
+      },
+      "Message": "Merge pull request #97 from LKHN/ami-90\n\nAdd 9 AMIs and some fixes for Generic Cloud Images",
+      "PGPSignature": "-----BEGIN PGP SIGNATURE-----\n\nwsBcBAABCAAQBQJimfnYCRBK7hj4Ov3rIwAA5CoIAJzD+iXIQ0MKqn9ql+KNGPNi\nSxUenCrZQiFn8NZ14saJwJKQUWpXHfWR2ej2K6WdD+X+0mjpUnoxF3QPhckNhVjA\nyutS8mcttagO25CTsorkTwOGYE1LTdzoU/13Ow+jYMMr7Zl6bb0M2GxZwLkpOiVd\ndLUHzvwzYUvcMh4vx1sq/7Dl4bqbYCbA/N1zavtxXFg94+JqOl19H6BeW5ASI1r1\n8U+9nW3J+vXCDu2FMyzTm03R+ghUvT/0/tRlR0df4OXjxCWZeh4g50U+7Fs22cJj\nWjWcv9ELKDhdHpI7tYDMqo6rLuRFk8pTi71yN8h4izSQwkSb92/SYiEPkIz+s+k=\n=HWtS\n-----END PGP SIGNATURE-----\n\n",
+      "Parents": [
+        "71fb43d2e4d0fd3f3ce3cceb8da6534c18a43f4c",
+        "3afd0c736f78b929e40e1a32ab9271b1eeca978b"
+      ],
+      "Tree": "02c0afeb4182792c24310a178ac22ba9e1bc64f2"
+    }
+  },
+  "signer": "ZXphbXJpeUBhbG1hbGludXgub3Jn",
+  "revoked": "0001-01-01T00:00:00Z",
+  "status": 0,
+  "PublicKey": "",
+  "verified": true,
+  "Verbose": null
+}
+```
+
+So that we can always get a git repository URL (`name`), a commit hash
+(`metadata.git.Commit`) and other meta information by a record `hash`.
+
+Technically, we need to do the following for CAS integration into the Git
+Updater service:
+
+1. After cloning an upstream git repository and checking out a target
+   tag/branch (**3** message on the above diagram) notarize a commit (**4**)
+   and save a CAS record `hash` for further processing:
+
+   ```shell
+   $ cas notarize git:///git_repository_path/ -o json | jq -r '.hash'
+   ```
+
+2. Create a new commit based on the upstream commit for a matching AlmaLinux
+   Git repository (**8**) and notarize it (**9** and **10**). Also, add the
+   upstream commit CAS hash to the notarization record so that later it will
+   be possible to trace the source:
+
+   ```shell
+    $ cas notarize git:///git_repository_path/ \
+          -attr upstream_commit_sbom_hash="${UPSTREAM_COMMIT_CAS_HASH}"
+          -o json | jq -r '.hash'
+   ```
+
+3. For automatically de-branded commits do the same but also add a CAS hash
+   of the AlmaLinux GIT original (not de-branded) commit:
+
+   ```shell
+   $ cas notarize git:///git_repository_path/ \
+         -attr upstream_commit_sbom_hash="${UPSTREAM_COMMIT_CAS_HASH}"
+         -attr alma_commit_sbom_hash="${ALMA_COMMIT_CAS_HASH}"
+         -o json
+   ```
+
+After those changes implementation we will have a chain of trust between an
+upstream git repository and our git repository.
+
 
 ### AlmaLinux OS Build System artifacts notarization
 
