@@ -240,6 +240,7 @@ What data should be added for each artifact?:
 * Build host name
 * Notarization API version (e.g. 0.1) so that we can change data format later
   and handle that. We decided to call it `sbom_api_ver='0.1'`
+* Author of the build. TODO: decide what should be saved here (e.g. email or login.)
 
 
 ### Signed packages notarization
