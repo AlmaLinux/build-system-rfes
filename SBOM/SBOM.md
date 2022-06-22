@@ -128,8 +128,8 @@ Updater service:
 
    ```shell
     $ cas notarize git:///git_repository_path/ \
-          -attr upstream_commit_sbom_hash="${UPSTREAM_COMMIT_CAS_HASH}"
-          -attr sbom_api_ver='0.1'
+          --attr upstream_commit_sbom_hash="${UPSTREAM_COMMIT_CAS_HASH}"
+          --attr sbom_api_ver='0.1'
           -o json | jq -r '.hash'
    ```
 
@@ -138,9 +138,9 @@ Updater service:
 
    ```shell
    $ cas notarize git:///git_repository_path/ \
-         -attr upstream_commit_sbom_hash="${UPSTREAM_COMMIT_CAS_HASH}"
-         -attr alma_commit_sbom_hash="${ALMA_COMMIT_CAS_HASH}"
-         -attr sbom_api_ver='0.1'
+         --attr upstream_commit_sbom_hash="${UPSTREAM_COMMIT_CAS_HASH}"
+         --attr alma_commit_sbom_hash="${ALMA_COMMIT_CAS_HASH}"
+         --attr sbom_api_ver='0.1'
          -o json
    ```
 
@@ -209,6 +209,8 @@ What should be done for CAS integration?
    $ cas notarize LICENSE \
          --attr build_id=10 \
          --attr source_type=git \
+         # this is only for commits from AlmaLinux git
+         --attr alma_commit_sbom_hash="${ALMA_COMMIT_CAS_HASH}" \
          --attr git_url=https://example.com/example-git \
          --attr git_ref=test-ref \
          --attr git_commit=commit-hash \
@@ -284,6 +286,42 @@ sequenceDiagram
         Sign Node--xBuild Master: Report sign task failed
     end
 ```
+
+What should be done for CAS integration?
+
+1. After downloading an unsigned RPM we should authenticate it in the CAS
+   database (**4**) and copy its metadata so that we can add it to a signed
+   RPM CAS record:
+
+   ```shell
+    $ cas authenticate ${FILE_PATH} --output json
+    # it should return 0 status, the file should be TRUSTED
+    # we should save the `metadata` from the json output
+   ```
+
+2. After signing we should notarize a signed RPM, add a reference to the
+   matching unsigned RPM CAS record and copy the unsigned CAS record metadata.
+   Also, get the signed RPM CAS hash:
+
+   ```
+   $ cas notarize ${FILE_PATH} \
+         --attr unsigned_pkg_hash="${UNSIGNED_RPM_CAS_HASH}" \
+         --attr sbom_api_ver=0.1 \
+         --attr signed_by="Eugene Zamriy <ezamriy@almalinux.org>" \
+         --attr sign_key_id="${PGP_KEY_ID}" \
+         # TODO: add metadata attributes copied from the unsigned CAS record
+         --attr .... \
+         --output json | jq '.hash' -r
+   ```
+
+3. Next, we should add the signed CAS record back reference to the unsigned
+   CAS record:
+
+   ```shell
+   $ cas notarize --hash "${UNSIGNED_RPM_CAS_HASH}" \
+         --attr signed_pkg_hash="${SIGNED_RPM_CAS_HASH}" \
+         --sbom_api_ver=0.1
+   ```
 
 
 ### Release pipeline notarization
@@ -386,6 +424,11 @@ SignerID:	ZXphbXJpeUBhbG1hbGludXgub3Jn
 Apikey revoked:	no
 Status:		TRUSTED
 ```
+
+
+## Possible future improvements
+
+* Add a dedicated arbiter node that should securely process data.
 
 
 ## References
