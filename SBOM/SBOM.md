@@ -203,8 +203,10 @@ What should be done for CAS integration?
    # it should return 0 for authenticated and trusted commits
    ```
    Save the state of authentication for sending to master.
+   
+   Authentication state should be shown in UI for every project in build
 
-2. Notarize each artifact after build is completed:
+2. Notarize each artifact after build is completed, even if source isn't authenticated:
    ```shell
    $ cas notarize LICENSE \
          --attr build_id=10 \
