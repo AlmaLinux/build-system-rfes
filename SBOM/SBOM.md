@@ -215,6 +215,7 @@ What should be done for CAS integration?
          --attr git_ref=test-ref \
          --attr git_commit=commit-hash \
          --attr build_host=example.almalinux.org \
+         --attr built_by="Eugene Zamriy <ezamriy@almalinux.org>" \
          --attr sbom_api_ver=0.1 \
          --output json
    ```
@@ -227,22 +228,22 @@ What data should be added for each artifact?:
 
 * build id
 * reference (what is the source?)
-  * For gits:
+  * For gits `source_type=git`:
     * URL
     * tag/branch
     * commit hash
-  * For remote srpms:
-    * URL
-    * checksum
-    * NEVRA? TODO: ask Andrew
-  * For uploaded srpms:
-    * checksum
-    * NEVRA? TODO: ask Andrew
-* Target architecture. TODO: ask 
+  * For remote srpms `source_type=srpm`:
+    * URL `srpm_url=`
+    * checksum `srpm_sha256=`
+    * NEVRA? `srpm_nevra=${epoch}:${version}-${release}`
+  * For uploaded srpms `source_type=srpm`:
+    * checksum `srpm_sha256=`
+    * NEVRA? `srpm_nevra=${epoch}:${version}-${release}`
+* Target architecture. `build_arch=`
 * Build host name
 * Notarization API version (e.g. 0.1) so that we can change data format later
   and handle that. We decided to call it `sbom_api_ver='0.1'`
-* Author of the build. TODO: decide what should be saved here (e.g. email or login.)
+* Author of the build (e-mail and name if available)
 
 
 ### Signed packages notarization
