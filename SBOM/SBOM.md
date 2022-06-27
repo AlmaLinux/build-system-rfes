@@ -352,6 +352,14 @@ sequenceDiagram
     end
     Exporter-->>-Maintainer: Report successful export
 ```
+What should be done for CAS integration in release pipeline?
+
+1. Warn user if he try to release builds with unnotarized sources/packages,
+   we can check this using information from database. Also there should be
+   ability to release builds with unnotarized sources/packages
+
+2. Add authentication for packages by their checksum from PULP during execution release plan,
+   if some packages are not notarized, we should fail release and show error in release logs
 
 
 ## Codenotary CAS usage
