@@ -50,6 +50,8 @@ There is the [copr](https://dnf-plugins-core.readthedocs.io/en/latest/copr.html)
 * A user can release one or more projects from a build to a community repository owned by him or his team.
 * A user can delete a project (and all its RPMs. A project here is a unique NEVR) from a community repository. In the next iteration we will add support for an individual RPM deletion.
 * A user can select a community repo as a build flavor.
+* A user can see a list of his copr repositories.
+
 
 ### Second milestone
 
