@@ -39,6 +39,23 @@ On the AlmaLinux Build System side we need to implement the following:
 There is the [copr](https://dnf-plugins-core.readthedocs.io/en/latest/copr.html) DNF core plugin that provides integration with the [Fedora COPR](https://copr.fedorainfracloud.org/) Build System. It can be easily configured to work with our Build System (it's called "hub" in Fedora's CoPr terminology), see the integration section below.
 
 
+## Requirements
+
+### First milestone
+
+* A user should be able to select EPEL as a default build flavor for his further builds.
+* The backend should always match `epel-${releasever}-${basearch}` platforms to AlmaLinux platforms even if EPEL is not enabled. This is because the COPR DNF plugin doesn't support other EL targets.
+* We are not going to sign packages in community repositories in the first (alpha) release. This will be implemented in the next iteration.
+* A user can use a github-like form to create a new community repository: owner (either this user or one of his teams), name/title, description, list of target platform (currently we support only AlmaLinux 8 and 9).
+* A user can release one or more projects from a build to a community repository owned by him or his team.
+* A user can delete a project (and all its RPMs. A project here is a unique NEVR) from a community repository. In the next iteration we will add support for an individual RPM deletion.
+* A user can select a community repo as a build flavor.
+
+### Second milestone
+
+TBD in middle July.
+
+
 ## The implementation
 
 
