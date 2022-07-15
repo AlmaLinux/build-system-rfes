@@ -118,7 +118,7 @@ Updater service:
    and save a CAS record `hash` for further processing:
 
    ```shell
-   $ cas notarize git:///git_repository_path/ -o json | jq -r '.hash'
+   $ cas notarize git:///git_repository_path/ --bom -o json | jq -r '.hash'
    ```
 
 2. Create a new commit based on the upstream commit for a matching AlmaLinux
@@ -128,8 +128,9 @@ Updater service:
 
    ```shell
     $ cas notarize git:///git_repository_path/ \
-          --attr upstream_commit_sbom_hash="${UPSTREAM_COMMIT_CAS_HASH}"
-          --attr sbom_api_ver='0.1'
+          --attr upstream_commit_sbom_hash="${UPSTREAM_COMMIT_CAS_HASH}" \
+          --attr sbom_api_ver='0.1' \
+          --bom \
           -o json | jq -r '.hash'
    ```
 
@@ -138,9 +139,10 @@ Updater service:
 
    ```shell
    $ cas notarize git:///git_repository_path/ \
-         --attr upstream_commit_sbom_hash="${UPSTREAM_COMMIT_CAS_HASH}"
-         --attr alma_commit_sbom_hash="${ALMA_COMMIT_CAS_HASH}"
-         --attr sbom_api_ver='0.1'
+         --attr upstream_commit_sbom_hash="${UPSTREAM_COMMIT_CAS_HASH}" \
+         --attr alma_commit_sbom_hash="${ALMA_COMMIT_CAS_HASH}" \
+         --attr sbom_api_ver='0.1' \
+         --bom \
          -o json
    ```
 
@@ -219,6 +221,7 @@ What should be done for CAS integration?
          --attr build_host=example.almalinux.org \
          --attr built_by="Eugene Zamriy <ezamriy@almalinux.org>" \
          --attr sbom_api_ver=0.1 \
+         --bom \
          --output json
    ```
 3. Send a list of the artifacts and their CAS hashes to master.
@@ -314,6 +317,7 @@ What should be done for CAS integration?
          --attr sign_key_id="${PGP_KEY_ID}" \
          # TODO: add metadata attributes copied from the unsigned CAS record
          --attr .... \
+         -- bom \
          --output json | jq '.hash' -r
    ```
 
