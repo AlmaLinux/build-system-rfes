@@ -441,6 +441,196 @@ Status:		TRUSTED
 ```
 
 
+## SBOM data export
+
+There are two main SBOM data format standards supported by the majority of
+software:
+
+  * [OWASP CycloneDX](https://cyclonedx.org/) - SBOM format created by
+    Open Web Application Security Project ([OWASP](https://owasp.org/)). This
+    format supports JSON and XML reports.
+  * [SPDX](https://spdx.dev/) - ISO-standardized SBOM format created by Linux
+    Foundation. This format supports JSON and Tag-Value reports.
+
+We are going to start from the CycloneDX JSON reports and add other formats
+later.
+
+We are going to generate SBOM data for the following components:
+
+  * build system packages (stage 1)
+  * build system builds (stage 1)
+  * official AlmaLinux OS container images (stage 2)
+  * AlmaLinux OS repositories (stage 3)
+  * AlmaLinux OS ISO images (stage 3)
+
+
+### CycloneDX JSON SBOM data export
+
+The CycloneDX specification can be found here:
+https://cyclonedx.org/specification/overview/.
+
+
+#### Build System build SBOM data record
+
+A minimal build system build SBOM data record example is shown below:
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  // it's recommended for every generated BOM to have a unique RFC-4122 serial
+  // number even if its content is not changed.
+  "serialNumber": "urn:uuid:2ce31adb-343d-4573-85ea-e6c4569cd8a6",
+  // BOM document version. It should be incremented by 1 every time when a BOM
+  // is modified (e.g. build is changed).
+  // In our case it means we should increment it every time we add a new
+  // artifact, sign a build, etc.
+  "version": 1,
+  // BOM (in our case build) metadata
+  "metadata": {
+    // timestamp when the BOM was created. In our case it's a build creation
+    // timestamp.
+    "timestamp": "2022-09-09T11:16:57+03:00",
+    // information about tool(s) used in the creation of the BOM
+    "tools": [
+      {
+        "vendor": "AlmaLinux OS Foundation",
+        "name": "AlmaLinux Build System",
+        "version": "0.1"
+      },
+      {
+        "vendor": "Codenotary Inc",
+        "name": "Community Attestation Service (CAS)",
+        // can be extracted from the "cas --version" output
+        "version": "1.0.0"
+      }
+    ],
+    "component": {
+      // type of a component, see a list of allowed types here:
+      // https://cyclonedx.org/docs/1.4/json/#metadata_component_type.
+      // It seems like "library" is the best choice for build system builds.
+      "type": "library",
+      // name of a component. It's required, so I propose use
+      // "build-${BUILD_ID}" as something that we can easily generate.
+      "name": "build-478",
+      // build's author
+      "author": "Eugene Zamriy <ezamriy@almalinux.org>",
+      // every component can have an arbitrary list of properties that contain
+      // data not officially supported by the CycloneDX format.
+      "properties": [
+        {
+          // build system build unique identifier
+          "name": "almalinux:albs:build:ID",
+          "value": "478"
+        },
+        {
+          // build system build URL
+          "name": "almalinux:albs:build:URL",
+          "value": "https://build.almalinux.org/build/478"
+        }
+      ]
+    }
+  },
+  // a list of packages in the build
+  "components": [
+    {
+      "type": "library",
+      // "name" tag in an RPM package
+      "name": "bash",
+      // "epoch:version-release" tags in an RPM package. Epoch should be
+      // omitted if not defined.
+      "version": "4.4.20-4.el8_6",
+      // "vendor" tag in an RPM package
+      "publisher": "AlmaLinux",
+      // RPM package checksum
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "aeb7b7d638ebad749c8ef2ec7c8b699201e176101f129a49dcb5781158e95632"
+        }
+      ],
+      // CPE name accordingly to this specification:
+      // https://nvd.nist.gov/products/cpe
+      "cpe": "TBD",
+      // package URL accordingly to this specification:
+      // https://github.com/package-url/purl-spec
+      "purl": "TBD",
+      "properties": [
+        // RPM package epoch if present ("epoch" tag)
+        {
+          "name": "almalinux:package:epoch",
+          "value": "1",
+        },
+        // RPM package version ("version" tag)
+        {
+          "name": "almalinux:package:version",
+          "value": "4.4.20"
+        },
+        // RPM package release ("release" tag)
+        {
+          "name": "almalinux:package:release",
+          "value": "4.el8_6"
+        },
+        // RPM package architecture ("arch" tag)
+        {
+          "name": "almalinux:package:arch",
+          "value": "x86_64"
+        },
+        // RPM package source RPM name ("sourcerpm" tag)
+        {
+          "name": "almalinux:package:sourcerpm",
+          "value": "bash-4.4.20-4.el8_6.src.rpm"
+        },
+        // RPM package build host ("buildhost" tag)
+        {
+          "name": "almalinux:package:buildhost",
+          "value": "x64-builder02.almalinux.org"
+        },
+        // build system target architecture
+        {
+          "name": "almalinux:albs:build:targetArch",
+          "value": "x86_64"
+        },
+        // build system package type (we are going to support debs later)
+        {
+          "name": "almalinux:albs:build:packageType",
+          "value": "rpm"
+        },
+        // SBOM CAS record hash
+        {
+          "name": "almalinux:sbom:casHash",
+          "value": "aeb7b7d638ebad749c8ef2ec7c8b699201e176101f129a49dcb5781158e95632"
+        },
+        // build system build unique identifier
+        {
+          "name": "almalinux:albs:build:ID",
+          "value": "478"
+        },
+        // build system build URL
+        {
+          "name": "almalinux:albs:build:URL",
+          "value": "https://build.almalinux.org/build/478"
+        },
+        // build system build author
+        {
+          "name": "almalinux:albs:build:author",
+          "value": "Eugene Zamriy <ezamriy@almalinux.org>"
+        }
+      ]
+    }
+  ]
+}
+```
+
+The `serialNumber` can be generated using the `uuid` Python module:
+
+```python
+import uuid
+uuid.uuid4()
+> UUID('2ce31adb-343d-4573-85ea-e6c4569cd8a6')
+```
+
+
 ## Possible future improvements
 
 * Add a dedicated arbiter node that should securely process data.
