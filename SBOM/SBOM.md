@@ -467,7 +467,8 @@ We are going to generate SBOM data for the following components:
 ### CycloneDX JSON SBOM data export
 
 The CycloneDX specification can be found here:
-https://cyclonedx.org/specification/overview/.
+https://cyclonedx.org/specification/overview/. There is also an official Python
+library for generating SBOM data: https://github.com/CycloneDX/cyclonedx-python-lib.
 
 
 ### AlmaLinux package SBOM data record
@@ -518,8 +519,9 @@ https://cyclonedx.org/specification/overview/.
         }
       ],
       // CPE name accordingly to this specification:
-      // https://nvd.nist.gov/products/cpe
-      "cpe": "TBD",
+      // https://nvd.nist.gov/products/cpe. A detailed explanation is provided
+      // after this code snippet.
+      "cpe": "cpe:2.3:a:almalinux:bash:4.4.20-4.el8_6:*:*:*:*:*:*:*",
       // package URL accordingly to this specification:
       // https://github.com/package-url/purl-spec
       "purl": "TBD",
@@ -589,6 +591,38 @@ https://cyclonedx.org/specification/overview/.
   }
 }
 ```
+
+The `cpe` package field uses the following format:
+
+```
+cpe:<cpe_spec_version>:<part>:<vendor>:<product>:<version>:<update>:<edition>:<language>:<sw_edition>:<target_sw>:<target_hw>:<other>
+```
+
+Where:
+
+  * `cpe_spec_version` - the CPE specification version, the latest one is 2.3 at
+      the moment of writing.
+  * `part` - a component type: `a` for applications, `h` for hardware and
+      `o` for operating systems. We should use `a` for packages.
+  * `vendor` - a person or organization that created a component. In our case
+      the value should be `almalinux`.
+  * `product` - a component name. For packages it should be a package name
+      (e.g. `bash`).
+  * `version` - a component version. For packages it should be a package
+      version in the `${version}-${release}` format for packages without epoch
+      and `${epoch}\\:${version}-${release}` format for packages with epoch
+      defined.
+
+The rest of fields is not usable for packages and should have the `*` value.
+If you are interested, you can find their description there:
+https://en.wikipedia.org/wiki/Common_Platform_Enumeration.
+
+Here is an example CPE value for the `0:bash-4.4.20-4.el8_6` package:
+
+```
+cpe:2.3:a:almalinux:bash:4.4.20-4.el8_6:*:*:*:*:*:*:*
+```
+
 
 #### Build System build SBOM data record
 
@@ -671,7 +705,7 @@ A minimal build system build SBOM data record example is shown below:
       ],
       // CPE name accordingly to this specification:
       // https://nvd.nist.gov/products/cpe
-      "cpe": "TBD",
+      "cpe": "cpe:2.3:a:almalinux:bash:4.4.20-4.el8_6:*:*:*:*:*:*:*",
       // package URL accordingly to this specification:
       // https://github.com/package-url/purl-spec
       "purl": "TBD",
