@@ -524,7 +524,7 @@ library for generating SBOM data: https://github.com/CycloneDX/cyclonedx-python-
       "cpe": "cpe:2.3:a:almalinux:bash:4.4.20-4.el8_6:*:*:*:*:*:*:*",
       // package URL accordingly to this specification:
       // https://github.com/package-url/purl-spec
-      "purl": "TBD",
+      "purl": "pkg:rpm/almalinux/bash@4.4.20-4.el8_6?arch=x86_64\u0026epoch=1\u0026upstream=bash-4.4.20-4.el8_6.src.rpm",
       "properties": [
         // RPM package epoch if present ("epoch" tag)
         {
@@ -598,7 +598,7 @@ The `cpe` package field uses the following format:
 cpe:<cpe_spec_version>:<part>:<vendor>:<product>:<version>:<update>:<edition>:<language>:<sw_edition>:<target_sw>:<target_hw>:<other>
 ```
 
-Where:
+where:
 
   * `cpe_spec_version` - the CPE specification version, the latest one is 2.3 at
       the moment of writing.
@@ -622,6 +622,36 @@ Here is an example CPE value for the `0:bash-4.4.20-4.el8_6` package:
 ```
 cpe:2.3:a:almalinux:bash:4.4.20-4.el8_6:*:*:*:*:*:*:*
 ```
+
+The `purl` package field contains a package URL formatted accordingly to the
+[package URL specification](https://github.com/package-url/purl-spec):
+
+```
+pkg:<type>/<namespace>/name@version?qualifiers
+```
+
+where:
+
+  * `type` - a package type. For AlmaLinux OS it should be always `rpm`.
+  * `namespace` - an organization namespace. In our case it should be `almalinux`.
+  * `name` - a package name (e.g. `bash`).
+  * `version` - a package version in the `${version}-${release}` format.
+  * `qualifiers` - extra data for a package such as architecture or epoch.
+      For our case we are going to use the following qualifiers:
+    * `arch` - a package architecture (e.g. `noarch` or `x86_64`).
+    * `epoch` - a package epoch if present.
+    * `upstream` - a package source RPM name (e.g. `bash-4.4.20-4.el8_6.src.rpm`).
+        The [syft](https://github.com/anchore/syft) project uses that field
+        name, so we are going to keep it for compatibility reasons.
+
+Here is an example `purl` for the `1:bash-4.4.20-4.el8_6.x86_64` package:
+
+```
+pkg:rpm/almalinux/bash@4.4.20-4.el8_6?arch=x86_64\u0026epoch=1\u0026upstream=bash-4.4.20-4.el8_6.src.rpm
+```
+
+There is Python library [packageurl-python](https://github.com/package-url/packageurl-python)
+that may be useful for generating package URLs.
 
 
 #### Build System build SBOM data record
@@ -708,7 +738,7 @@ A minimal build system build SBOM data record example is shown below:
       "cpe": "cpe:2.3:a:almalinux:bash:4.4.20-4.el8_6:*:*:*:*:*:*:*",
       // package URL accordingly to this specification:
       // https://github.com/package-url/purl-spec
-      "purl": "TBD",
+      "purl": "pkg:rpm/almalinux/bash@4.4.20-4.el8_6?arch=x86_64\u0026epoch=1\u0026upstream=bash-4.4.20-4.el8_6.src.rpm",
       "properties": [
         // RPM package epoch if present ("epoch" tag)
         {
@@ -793,6 +823,10 @@ uuid.uuid4()
 ## References
 
 * [AlmaLinux Git Updater](https://github.com/AlmaLinux/git_migrator)
+* [CPE (common platform enumeration) specifications](https://cpe.mitre.org/specification/)
+* [Purl (package URL) specification](https://github.com/package-url/purl-spec)
+* [packageurl-python](https://github.com/package-url/packageurl-python) -
+    a Python library to parse and generate package URLs.
 
 
 ## Authors
