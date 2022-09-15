@@ -470,6 +470,126 @@ The CycloneDX specification can be found here:
 https://cyclonedx.org/specification/overview/.
 
 
+### AlmaLinux package SBOM data record
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  // it's recommended for every generated BOM to have a unique RFC-4122 serial
+  // number even if its content is not changed.
+  "serialNumber": "urn:uuid:2ce31adb-343d-4573-85ea-e6c4569cd8a6",
+  // BOM document version. It should be incremented by 1 every time when a BOM
+  // is modified (e.g. package is signed).
+  "version": 1,
+  // BOM (in our case package) metadata
+  "metadata": {
+    // timestamp when a BOM (package) was created. In our case it's a package
+    // build time extracted from the "buildtime" RPM tag.
+    "timestamp": "2022-09-09T11:16:57+00:00",
+    // information about tool(s) used in the creation of the BOM
+    "tools": [
+      {
+        "vendor": "AlmaLinux OS Foundation",
+        "name": "AlmaLinux Build System",
+        "version": "0.1"
+      },
+      {
+        "vendor": "Codenotary Inc",
+        "name": "Community Attestation Service (CAS)",
+        // can be extracted from the "cas --version" output
+        "version": "1.0.0"
+      }
+    ],
+    "component": {
+      "type": "library",
+      // package name
+      "name": "bash",
+      // "epoch:version-release" tags in an RPM package. Epoch should be
+      // omitted if not defined.
+      "version": "4.4.20-4.el8_6",
+      // package publisher
+      "publisher": "AlmaLinux",
+      // RPM package checksum
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "aeb7b7d638ebad749c8ef2ec7c8b699201e176101f129a49dcb5781158e95632"
+        }
+      ],
+      // CPE name accordingly to this specification:
+      // https://nvd.nist.gov/products/cpe
+      "cpe": "TBD",
+      // package URL accordingly to this specification:
+      // https://github.com/package-url/purl-spec
+      "purl": "TBD",
+      "properties": [
+        // RPM package epoch if present ("epoch" tag)
+        {
+          "name": "almalinux:package:epoch",
+          "value": "1",
+        },
+        // RPM package version ("version" tag)
+        {
+          "name": "almalinux:package:version",
+          "value": "4.4.20"
+        },
+        // RPM package release ("release" tag)
+        {
+          "name": "almalinux:package:release",
+          "value": "4.el8_6"
+        },
+        // RPM package architecture ("arch" tag)
+        {
+          "name": "almalinux:package:arch",
+          "value": "x86_64"
+        },
+        // RPM package source RPM name ("sourcerpm" tag)
+        {
+          "name": "almalinux:package:sourcerpm",
+          "value": "bash-4.4.20-4.el8_6.src.rpm"
+        },
+        // RPM package build host ("buildhost" tag)
+        {
+          "name": "almalinux:package:buildhost",
+          "value": "x64-builder02.almalinux.org"
+        },
+        // build system target architecture
+        {
+          "name": "almalinux:albs:build:targetArch",
+          "value": "x86_64"
+        },
+        // build system package type (we are going to support debs later)
+        {
+          "name": "almalinux:albs:build:packageType",
+          "value": "rpm"
+        },
+        // SBOM CAS record hash
+        {
+          "name": "almalinux:sbom:casHash",
+          "value": "aeb7b7d638ebad749c8ef2ec7c8b699201e176101f129a49dcb5781158e95632"
+        },
+        // build system build unique identifier
+        {
+          "name": "almalinux:albs:build:ID",
+          "value": "478"
+        },
+        // build system build URL
+        {
+          "name": "almalinux:albs:build:URL",
+          "value": "https://build.almalinux.org/build/478"
+        },
+        // build system build author
+        {
+          "name": "almalinux:albs:build:author",
+          "value": "Eugene Zamriy <ezamriy@almalinux.org>"
+        }
+      ]
+    }
+  }
+}
+```
+
 #### Build System build SBOM data record
 
 A minimal build system build SBOM data record example is shown below:
@@ -489,8 +609,8 @@ A minimal build system build SBOM data record example is shown below:
   // BOM (in our case build) metadata
   "metadata": {
     // timestamp when the BOM was created. In our case it's a build creation
-    // timestamp.
-    "timestamp": "2022-09-09T11:16:57+03:00",
+    // timestamp in the UTC timezone.
+    "timestamp": "2022-09-09T11:16:57+00:00",
     // information about tool(s) used in the creation of the BOM
     "tools": [
       {
