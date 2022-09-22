@@ -566,6 +566,28 @@ library for generating SBOM data: https://github.com/CycloneDX/cyclonedx-python-
           "name": "almalinux:albs:build:packageType",
           "value": "rpm"
         },
+        // see the "Package build source information" section below of this
+        // code snippet.
+        {
+          "name": "almalinux:albs:build:source:type",
+          "value": "git"
+        },
+        {
+          "name": "almalinux:albs:build:source:gitURL",
+          "value": "https://git.almalinux.org/rpms/bash.git"
+        },
+        {
+          "name": "almalinux:albs:build:source:gitRef",
+          "value": "c8"
+        },
+        {
+          "name": "almalinux:albs:build:source:gitCommit",
+          "value": "5cd0d67a640d79bbbbd09ed867f699136b4db8b6"
+        },
+        {
+          "name": "almalinux:albs:build:source:gitCommitCasHash",
+          "value": "7cef62002334937b491a9346aa054fa0d7d44bcc709aae7ec42b8a2b8ae544ce"
+        },
         // SBOM CAS record hash
         {
           "name": "almalinux:sbom:casHash",
@@ -654,7 +676,43 @@ There is Python library [packageurl-python](https://github.com/package-url/packa
 that may be useful for generating package URLs.
 
 
-#### Build System build SBOM data record
+#### Package build source information
+
+Each built package should contain information about sources that were used for
+its build in the `almalinux:albs:build:source:type` attribute. The value of it
+is stored in the `source_type` attribute in a CAS database package record.
+The Build System supports the following sources for packages:
+
+  * `git` - a git repository (typically on [git.almalinux.org](https://git.almalinux.org)).
+  * `srpm` - a pre-made source RPM. A user can either provide the source RPM
+      URL or upload it to the Build System manually.
+
+For packages built from git repositories we provide the following SBOM
+attributes:
+
+  * `almalinux:albs:build:source:gitURL` - (required) a git repository URL
+      (`git_url` in the CAS database).
+  * `almalinux:albs:build:source:gitRef` - (required) a git repository reference
+      (e.g. a tag or branch name). In the CAS database it is called `git_ref`.
+  * `almalinux:albs:build:source:gitCommit` - (required) a git commit  hash
+      (`git_commit` in the CAS database).
+  * `almalinux:albs:build:source:gitCommitCasHash` - (optional) a CAS hash of
+      the notarized git commit record (`alma_commit_sbom_hash` in the CAS
+      database). Currently, the Build System supports notarization only for
+      [git.almalinux.org](https://git.almalinux.org/) commits.
+
+For packages built from a source RPM we use the following SBOM attributes:
+
+  * `almalinux:albs:build:source:srpmURL` - (optional) a source RPM URL if we
+     know it (`srpm_url` in the CAS database).
+  * `almalinux:albs:build:source:srpmChecksum` - (required) a source RPM SHA-256
+     checksum (`srpm_sha256` in the CAS database).
+  * `almalinux:albs:build:source:srpmNEVRA` - (required) a source RPM
+      `${epoch}:${name}-${version}-${release}.${arch}` (`srpm_nevra` in the
+      CAS database).
+
+
+### Build System build SBOM data record
 
 A minimal build system build SBOM data record example is shown below:
 
@@ -779,6 +837,22 @@ A minimal build system build SBOM data record example is shown below:
         {
           "name": "almalinux:albs:build:packageType",
           "value": "rpm"
+        },
+        {
+          "name": "almalinux:albs:build:source:type",
+          "value": "srpm"
+        },
+        {
+          "name": "almalinux:albs:build:source:srpmURL",
+          "value": "https://build.almalinux.org/pulp/content/builds/AlmaLinux-8-src-4375-br/Packages/m/mc-4.8.19-9.el8.src.rpm"
+        },
+        {
+          "name": "almalinux:albs:build:source:srpmChecksum",
+          "value": "3b6523380baa44feb7310905c256a3de3530757a863837274fae9b9a5e6f9280"
+        },
+        {
+          "name": "almalinux:albs:build:source:srpmNEVRA",
+          "value": "1:mc-4.8.19-9.el8.src"
         },
         // SBOM CAS record hash
         {
