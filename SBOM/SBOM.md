@@ -240,11 +240,16 @@ What data should be added for each artifact?:
   * For remote srpms `source_type=srpm`:
     * URL `srpm_url=`
     * checksum `srpm_sha256=`
-    * NEVRA? `srpm_nevra=${epoch}:${version}-${release}`
   * For uploaded srpms `source_type=srpm`:
     * checksum `srpm_sha256=`
-    * NEVRA? `srpm_nevra=${epoch}:${version}-${release}`
 * Target architecture. `build_arch=`
+* RPM headers fields:
+  * name `name=`
+  * epoch `epoch=`
+  * version `version=`
+  * release `release=`
+  * arch `arch=`
+  * sourcerpm `sourcerpm=`
 * Build host name
 * Notarization API version (e.g. 0.1) so that we can change data format later
   and handle that. We decided to call it `sbom_api_ver='0.1'`
@@ -529,7 +534,7 @@ library for generating SBOM data: https://github.com/CycloneDX/cyclonedx-python-
         // RPM package epoch if present ("epoch" tag)
         {
           "name": "almalinux:package:epoch",
-          "value": "1",
+          "value": "1"
         },
         // RPM package version ("version" tag)
         {
