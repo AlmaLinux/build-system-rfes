@@ -31,7 +31,8 @@ Extend the command line options of alma-sbom in a way that we can generate SBOMs
 * Tag/Value
 * YAML
 
-Generating SPDX SBOMs into different formats is currently provided by [spdx-tools](https://pypi.org/project/spdx-tools/), which alma-sbom will depend on.
+Generating SPDX SBOMs into different formats is currently provided by [spdx-tools](https://pypi.org/project/spdx-tools/), which alma-sbom will depend on. This module also provides
+support for RDF format, but which has not been added to alma-sbom yet.
 
 ### SPDX SBOM data
 
