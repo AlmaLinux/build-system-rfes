@@ -235,5 +235,5 @@ to the SPDX identifier of that package.
 
 ## Authors
 
-* [Matthias Kruk](mailto:)
+* [Matthias Kruk](mailto:matthias@almalinux.org)
 * [Javier Hernández](mailto:javi@almalinux.org)
