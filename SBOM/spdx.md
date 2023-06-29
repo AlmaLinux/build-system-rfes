@@ -42,7 +42,31 @@ Ideally, common data could be included as part of a DB record, this way, we coul
 
 In addition to that, we only add the data that is specific to SPDX specification. At the time of writing this RFE, the current version of the SPDX specification is [v2.3](https://spdx.github.io/spdx-spec/v2.3/).
 
-**TODO**: Describe SPDX-specific data (or fields)
+#### SPDX-specific fields
+
+Apart from the fields that are shared between the CycloneDX and SPDX formats, SBOMs in SPDX format contain the
+following fields that are unique to the SPDX format.
+
+1. Data license
+2. SPDX identifier field
+3. Document name field
+4. SPDX document namespace field
+
+The data license field contains the name of the license under which the SBOM is published. The data license field
+of AlmaLinux SPDX SBOMs will be set to `CC0-1.0`, Creative Commons CC0 1.0 Universal Public Domain Dedication.
+
+The SPDX identifier field is hardcoded to the value `SPDXRef-DOCUMENT`.
+
+The document name field will be set to the name and version of the package in the SBOM, separated with a hyphen.
+If the SBOM contains multiple packages, the name will be set to the value of the name field in the build metadata
+of the DB record.
+
+The value of the SPDX document namespace field will be constructed from the string `https://security.almalinux.org/spdx/`, the value of the document name field, and a UUID, joined by hyphens.
+
+Records in the database that cannot be mapped to fields in the SPDX format will be represented with SPDX Annotations. The name and value of the record that could not be mapped will be stored in the comment field
+of the annotation in the form `name=value`, and the type of the annotation will be set to `OTHER`. If the record pertains to a package in the SBOM, the SPDX identifier reference field of the annotation will be set
+to the SPDX identifier of that package.
+
 
 #### SPDX SBOM record of a package
 
@@ -213,4 +237,3 @@ In addition to that, we only add the data that is specific to SPDX specification
 
 * [Matthias Kruk](mailto:)
 * [Javier Hernández](mailto:javi@almalinux.org)
-
