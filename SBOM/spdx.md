@@ -71,7 +71,7 @@ to the SPDX identifier of that package.
 
 #### SPDX SBOM record of a package
 
-```javascript
+```json
 {
     "SPDXID": "SPDXRef-DOCUMENT",
     "creationInfo": {
@@ -239,7 +239,7 @@ to the SPDX identifier of that package.
 
 #### SPDX SBOM record of a build
 
-```javascript
+```json
 {
     "SPDXID": "SPDXRef-DOCUMENT",
     "annotations": [
